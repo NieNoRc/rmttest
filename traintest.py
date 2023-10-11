@@ -42,10 +42,13 @@ def train_loop(dataloader:DataLoader, model:Module, loss_fn:CrossEntropyLoss, op
     for batch in dataloader:
         bertinput=batch['data']
         truth=batch['labels'].to(device)
+        support_infos=batch['support_infos']
         if bertinput['input_ids'].size()[1]>512:
             continue
+        if len(support_infos)<1:
+            continue
         bertinput = {k: v.to(device) for k, v in bertinput.items()}
-        predict=model(bertinput=bertinput)
+        predict=model(bertinput=bertinput,supportinput=support_infos)
         loss=loss_fn(input=predict.permute(0,2,1),target=truth)
         total_loss += loss
         optimizer.zero_grad()
@@ -69,10 +72,11 @@ def test_loop(dataloader:DataLoader, model:Module, loss_fn:CrossEntropyLoss, dev
         for batch in dataloader:
             bertinput=batch['data']
             truth=batch['labels'].to(device)
+            support_infos=batch['support_infos']
             if bertinput['input_ids'].size()[1]>512:
                 continue
             bertinput = {k: v.to(device) for k, v in bertinput.items()}
-            predict=model(bertinput=bertinput)
+            predict=model(bertinput=bertinput,supportinput=support_infos)
             test_loss +=loss_fn(input=predict.permute(0,2,1),target=truth).item()
             RS.accum(predict=predict,truth=truth,labelsmap_inverse=labels_map_inverse)
     test_loss /= num_batches

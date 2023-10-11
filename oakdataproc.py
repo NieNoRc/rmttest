@@ -1,6 +1,7 @@
 import json
 from torch.utils.data import Dataset
 from transformers import BertTokenizer, AutoTokenizer
+from gensupportinfo import AddSuppInfo
 label_map_set = {'I-vendor', 'B-hardware', 'B-language', 'B-parameter', 'I-relevant_term', 'I-os', 'I-hardware', 'B-cve id', 'B-method', 'B-programming', 'B-function', 'I-update', 'B-version',
                  'I-version', 'B-cve', 'I-application', 'B-update', 'O', 'B-file', 'B-relevant_term', 'B-programming language', 'B-application', 'B-os', 'B-edition', 'I-edition', 'B-vendor'}
 label_map_ext = {'PAD': -100, 'O': 0, 'B-application': 1, 'I-application': 2, 'B-cve': 3, 'B-cve id': 3, 'I-cve': 4, 'I-cve id': 4, 'B-edition': 5, 'I-edition': 6, 'B-file': 7, 'I-file': 8, 'B-function': 9, 'I-function': 10, 'B-hardware': 11, 'I-hardware': 12, 'B-language': 13, 'I-language': 14, 'B-method': 15,
@@ -10,14 +11,15 @@ label_list = ['I-vendor', 'B-hardware', 'B-language', 'B-parameter', 'I-relevant
 labels_map_inverse=['O', 'B-application', 'I-application', 'B-cve', 'I-cve', 'B-edition', 'I-edition', 'B-file', 'I-file', 'B-function', 'I-function', 'B-hardware', 'I-hardware', 'B-language', 'I-language', 'B-method', 'I-method', 'B-os', 'I-os', 'B-parameter', 'I-parameter', 'B-programming', 'I-programming', 'B-relevant_term', 'I-relevant_term', 'B-update', 'I-update', 'B-vendor', 'I-vendor', 'B-version', 'I-version']
 
 class OakDataSet(Dataset):
-    def __init__(self, datadir: str, modelpath: str):
+    def __init__(self, datadir: str, modelpath: str,supp_info_producer:AddSuppInfo):
         super().__init__()
         self.data = []        
         self.traindata = []
         self.testdata = []
         self.tokenizer = AutoTokenizer.from_pretrained(modelpath)
+        self.supp_info_producer=supp_info_producer
         self.readjson(datadir)
-
+        
 
     def __len__(self):
         return len(self.data)
@@ -62,11 +64,12 @@ class OakDataSet(Dataset):
                     entry = self.tokenizer(words, is_split_into_words=True)
                     new_label = self.label_proc(
                         labels, entry.encodings[0].word_ids)
+                    support_infos=self.supp_info_producer.gen_support_infos(tokenizer=self.tokenizer,words=words,encoding=entry.encodings[0])
                     #self.data.append({'data': entry, 'labels': new_label})
                     if datanum%10<7:
-                        self.traindata.append({'data': entry, 'labels': new_label})
+                        self.traindata.append({'data': entry, 'labels': new_label,'support_infos':support_infos})
                     else:
-                        self.testdata.append({'data': entry, 'labels': new_label})
+                        self.testdata.append({'data': entry, 'labels': new_label,'support_infos':support_infos})
                     datanum+=1
 
     def shift_label(self, origin_label: str) -> int:
