@@ -66,6 +66,8 @@ class OakDataSet(Dataset):
                         labels, entry.encodings[0].word_ids)
                     support_infos=self.supp_info_producer.gen_support_infos(tokenizer=self.tokenizer,words=words,encoding=entry.encodings[0])
                     #self.data.append({'data': entry, 'labels': new_label})
+                    if len(entry['input_ids'])>512:
+                        continue
                     if datanum%10<7:
                         self.traindata.append({'data': entry, 'labels': new_label,'support_infos':support_infos})
                     else:
