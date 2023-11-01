@@ -108,7 +108,7 @@ class AddSuppInfo():
                     if encoding.word_ids[j]==i:
                         insert_pos.append(j)
                         break
-                method_infos.append({'words':supportsentense,'insert_pos':insert_pos})
+                method_infos.append({'words':supportsentense,'insert_pos':insert_pos,'support_wdid':[0,0]})
         return method_infos
     def gen_support_infos(self,tokenizer:PreTrainedTokenizer, words:list,encoding:Encoding):
         return self.tokenize_supportsentence(tokenizer=tokenizer,sentences=self.methodattractsent(words,encoding))
@@ -118,7 +118,8 @@ class AddSuppInfo():
             support_input=tokenizer(entry['words'],is_split_into_words=True)
             support_id=[]
             for j in range(0,len(support_input.encodings[0].word_ids)):
-                if support_input.encodings[0].word_ids[j]==0:
+                current_word_id=support_input.encodings[0].word_ids[j]
+                if current_word_id is not None and current_word_id>=entry['support_wdid'][0] and current_word_id<=entry['support_wdid'][1]:
                     support_id.append(j)
             support_input={k: tensor(v) for k, v in support_input.items()}
             support_infos.append({'bert_input':support_input,'insert_pos':entry['insert_pos'],'support_wp_ids':support_id})
