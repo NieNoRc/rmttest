@@ -18,11 +18,11 @@ def main():
     epochs=70
     insert_supp_flag=True
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model=PartialTrainableBERT(modelpath=modelpath,flag_layer_num=10,num_labels=31).to(device=device)
+    model=PartialTrainableBERT(modelpath=modelpath,flag_layer_num=11,num_labels=31)
     loss_fn = torch.nn.CrossEntropyLoss(ignore_index=label_map_ext['PAD'])
     #optimizer = torch.optim.SGD(model.parameters(), lr=learn_rate)
     optimizer = torch.optim.AdamW(model.parameters(),lr=learn_rate)
-    supp_info_proc=AddSuppInfo()
+    supp_info_proc=AddSuppInfo(index_fname='index.json',wiki_info_fname='wiki_info.json')
     oakdataset = OakDataSet(
         datadir=datapath, modelpath=modelpath,supp_info_producer=supp_info_proc)
     train_dataset=Dataset.from_list(oakdataset.traindata)
