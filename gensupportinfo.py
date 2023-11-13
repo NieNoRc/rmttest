@@ -85,10 +85,14 @@ class AddSuppInfo():
         method_infos=[]
         ipre='[0-9]+\.[0-9]+\.[0-9]+\.[0-9]'
         ip_patt=re.compile(pattern=ipre)
+        num_re='[0-9]+'
+        num_patt=re.compile(pattern=num_re)
         trust_level_str=['probably','likely','almost']
         for i in range(0,len(words)):
             if ip_patt.fullmatch(words[i]) is not None:
                 supportsentense=[words[i],'is','an','IP','address']
+            elif len(words[i].split('/'))>2:
+                supportsentense=[words[i],'is','an','file','path']
             else:
                 trust_level=0
                 if(len(words[i])<2):
@@ -100,7 +104,8 @@ class AddSuppInfo():
                     trust_level+=1
                 if '::' in words[i]:
                     trust_level+=1
-                if len(words[i].split('.'))>2:
+                dot_split=words[i].split('.')
+                if len(dot_split)>2 and 'http' not in words[i] and '/' not in words[i] and not num_patt.fullmatch(dot_split[0]) and not num_patt.fullmatch(dot_split[1]):
                     trust_level+=1
                 upper_split=re.split(pattern='[A-Z]',string=words[i])
                 upper_split_cnt=0
@@ -115,6 +120,8 @@ class AddSuppInfo():
                     if trust_level<len(trust_level_str):
                         supportsentense.append(trust_level_str[trust_level-1])
                     supportsentense+=['a', 'method','.']
+                    if '()' not in words[i]:
+                        supportsentense+=['or','a','parameter','.']
             if len(supportsentense) > 0:
                 insert_pos=[]
                 for j in range(0,len(encoding.word_ids)):
@@ -158,7 +165,8 @@ class AddSuppInfo():
                         keywords=keywords.strip()
                         if keywords in self.wiki_support_info and self.wiki_support_info[keywords]['flag']==1:
                             insert_pos=[]
-                            insert_words=re.split(pattern=r'[ .,()]',string=self.wiki_support_info[keywords]['summary'])
+                            insert_words_raw=re.split(pattern=r' |([.,()])',string=self.wiki_support_info[keywords]['summary'])
+                            insert_words=[x for x in insert_words_raw if x!=None and len(x)>0]
                             for k in range(0,len(encoding.word_ids)):
                                 if encoding.word_ids[k]==i:
                                     insert_pos.append(k)
