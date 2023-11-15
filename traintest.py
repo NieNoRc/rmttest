@@ -32,7 +32,8 @@ class ResultStat():
             self.truth.append(temp_truth)
 
     def get_result(self):
-        return classification_report(self.truth, self.pred, mode='strict', scheme=IOB2)
+        return classification_report(self.truth, self.pred, mode='strict', scheme=IOB2,digits=4)
+        #return classification_report(self.truth, self.pred, scheme=IOB2,digits=4)
 def train_loop(dataloader:DataLoader, model:Module, loss_fn:CrossEntropyLoss, optimizer:optim.AdamW, device,insert_support_flag:bool,accelor:Accelerator=None):
     size = len(dataloader.dataset)
     model = model.train()
@@ -58,10 +59,10 @@ def train_loop(dataloader:DataLoader, model:Module, loss_fn:CrossEntropyLoss, op
         optimizer.zero_grad()
         if accelor is not None:
             accelor.backward(loss)
-            accelor.clip_grad_value_(model.parameters(),5)
+            #accelor.clip_grad_value_(model.parameters(),5)
         else:
             loss.backward()
-            utils.clip_grad_value_(model.parameters(),5) #gradiant clipping
+            #utils.clip_grad_value_(model.parameters(),5) #gradiant clipping
         optimizer.step()
 
         if batchnum % 1024 == 0:

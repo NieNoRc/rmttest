@@ -91,8 +91,8 @@ class AddSuppInfo():
         for i in range(0,len(words)):
             if ip_patt.fullmatch(words[i]) is not None:
                 supportsentense=[words[i],'is','an','IP','address']
-            elif len(words[i].split('/'))>2:
-                supportsentense=[words[i],'is','an','file','path']
+            elif '/' in words[i]:
+                supportsentense=[words[i],'is','a','file','path']
             else:
                 trust_level=0
                 if(len(words[i])<2):
@@ -119,7 +119,7 @@ class AddSuppInfo():
                     supportsentense=[words[i],'is']
                     if trust_level<len(trust_level_str):
                         supportsentense.append(trust_level_str[trust_level-1])
-                    supportsentense+=['a', 'method','.']
+                    supportsentense+=['a', 'function','.']
                     if '()' not in words[i]:
                         supportsentense+=['or','a','parameter','.']
             if len(supportsentense) > 0:

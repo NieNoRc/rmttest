@@ -68,7 +68,7 @@ class OakDataSet(Dataset):
                     #self.data.append({'data': entry, 'labels': new_label})
                     if len(entry['input_ids'])>512:
                         continue
-                    if datanum%10<7:
+                    if datanum%10>1:
                         self.traindata.append({'data': entry, 'labels': new_label,'support_infos':support_infos})
                     else:
                         self.testdata.append({'data': entry, 'labels': new_label,'support_infos':support_infos})

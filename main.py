@@ -14,8 +14,8 @@ def main():
     #os.environ['CUDA_VISIBLE_DEVICES']='1'
     modelpath='models/bertbasecased'
     datapath='datas/oakcorpus/full_corpus.json'
-    learn_rate=2e-5
-    epochs=70
+    learn_rate=3e-5
+    epochs=50
     insert_supp_flag=True
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model=PartialTrainableBERT(modelpath=modelpath,flag_layer_num=11,num_labels=31,feature_layer=2)
